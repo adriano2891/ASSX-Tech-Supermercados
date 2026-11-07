@@ -23,16 +23,63 @@ import {
   LabelPrintJob,
   LabelDashboardStats,
 } from '../types/index.ts';
+import { clientDb } from './clientDb.ts';
 
 class ApiService {
   private activeUserId: string = 'usr-super';
+  private backendAvailable: boolean | null = null;
+  private checkingBackend: Promise<boolean> | null = null;
 
   public setActiveUser(userId: string) {
     this.activeUserId = userId;
+    clientDb.setActiveUser(userId);
   }
 
   public getActiveUserId(): string {
     return this.activeUserId;
+  }
+
+  /**
+   * Intelligently verifies whether the Node.js /api backend is reachable.
+   * If on a static CDN (e.g. Netlify, Vercel static, GitHub Pages), or if /api
+   * returns 404/HTML, switches instantly to the autonomous persistent Client Database.
+   */
+  public async isBackendAvailable(): Promise<boolean> {
+    if (this.backendAvailable !== null) return this.backendAvailable;
+
+    if (typeof window === 'undefined') {
+      this.backendAvailable = false;
+      return false;
+    }
+
+    // Direct check for static host indicators
+    if (window.location.hostname.includes('netlify.app')) {
+      this.backendAvailable = false;
+      return false;
+    }
+
+    if (!this.checkingBackend) {
+      this.checkingBackend = (async () => {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1200);
+          const res = await fetch('/api/health', { signal: controller.signal });
+          clearTimeout(timeoutId);
+          const contentType = res.headers.get('content-type') || '';
+          if (res.ok && contentType.includes('application/json')) {
+            const body = await res.json();
+            this.backendAvailable = body?.status === 'ok';
+            return this.backendAvailable;
+          }
+        } catch (_) {
+          // Server offline, static host, or network timeout
+        }
+        this.backendAvailable = false;
+        return false;
+      })();
+    }
+
+    return this.checkingBackend;
   }
 
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -47,11 +94,14 @@ class ApiService {
       headers,
     });
 
-    if (!res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (!res.ok || !contentType.includes('application/json')) {
       let errorMsg = `Erro na requisição (${res.status})`;
       try {
-        const body = await res.json();
-        if (body.error) errorMsg = body.error;
+        if (contentType.includes('application/json')) {
+          const body = await res.json();
+          if (body.error) errorMsg = body.error;
+        }
       } catch (_) {}
       throw new Error(errorMsg);
     }
@@ -60,129 +110,270 @@ class ApiService {
   }
 
   // Authentication & Sessions
-  public login(userId: string): Promise<{ user: UserProfile; token: string; message: string }> {
-    return this.request<{ user: UserProfile; token: string; message: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ userId }),
-    });
+  public async login(userId: string): Promise<{ user: UserProfile; token: string; message: string }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const res = await this.request<{ user: UserProfile; token: string; message: string }>('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ userId }),
+        });
+        clientDb.setActiveUser(res.user.id);
+        return res;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /auth/login, executando via ClientDB:', err);
+      }
+    }
+    const res = clientDb.login(userId);
+    this.setActiveUser(res.user.id);
+    return res;
   }
 
-  public logout(): Promise<{ success: boolean; message: string }> {
-    return this.request<{ success: boolean; message: string }>('/auth/logout', {
-      method: 'POST',
-    });
+  public async logout(): Promise<{ success: boolean; message: string }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<{ success: boolean; message: string }>('/auth/logout', { method: 'POST' });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /auth/logout, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.logout();
   }
 
-  public getMe(): Promise<UserProfile> {
-    return this.request<UserProfile>('/auth/me');
+  public async getMe(): Promise<UserProfile> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<UserProfile>('/auth/me');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /auth/me, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getMe();
   }
 
   // Users & Operators
-  public getUsers(): Promise<UserProfile[]> {
-    return this.request<UserProfile[]>('/users');
+  public async getUsers(): Promise<UserProfile[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<UserProfile[]>('/users');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /users, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getUsers();
   }
 
-  public createUser(data: Partial<UserProfile>): Promise<UserProfile> {
-    return this.request<UserProfile>('/users', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createUser(data: Partial<UserProfile>): Promise<UserProfile> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const user = await this.request<UserProfile>('/users', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+        clientDb.createUser(user);
+        return user;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /users, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createUser(data);
   }
 
-  public updateUser(id: string, data: Partial<UserProfile>): Promise<UserProfile> {
-    return this.request<UserProfile>(`/users/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+  public async updateUser(id: string, data: Partial<UserProfile>): Promise<UserProfile> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const user = await this.request<UserProfile>(`/users/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+        clientDb.updateUser(id, data);
+        return user;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /users, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateUser(id, data);
   }
 
-  public updateUserStatus(id: string, status: 'active' | 'inactive'): Promise<UserProfile> {
-    return this.request<UserProfile>(`/users/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
+  public async updateUserStatus(id: string, status: 'active' | 'inactive'): Promise<UserProfile> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<UserProfile>(`/users/${id}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status }),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PATCH /users/status, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateUserStatus(id, status);
   }
 
-  public updateUserPermissions(id: string, permissions: any): Promise<UserProfile> {
-    return this.request<UserProfile>(`/users/${id}/permissions`, {
-      method: 'PATCH',
-      body: JSON.stringify({ permissions }),
-    });
+  public async updateUserPermissions(id: string, permissions: any): Promise<UserProfile> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<UserProfile>(`/users/${id}/permissions`, {
+          method: 'PATCH',
+          body: JSON.stringify({ permissions }),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PATCH /users/permissions, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateUserPermissions(id, permissions);
   }
 
-  public deleteUser(id: string): Promise<{ success: boolean; deletedId: string }> {
-    return this.request<{ success: boolean; deletedId: string }>(`/users/${id}`, {
-      method: 'DELETE',
-    });
+  public async deleteUser(id: string): Promise<{ success: boolean; deletedId: string }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const res = await this.request<{ success: boolean; deletedId: string }>(`/users/${id}`, { method: 'DELETE' });
+        try { clientDb.deleteUser(id); } catch (_) {}
+        return res;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend DELETE /users, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.deleteUser(id);
   }
 
-  public getAuditLogs(limit: number = 100): Promise<AuditLog[]> {
-    return this.request<AuditLog[]>(`/audit?limit=${limit}`);
+  public async getAuditLogs(limit: number = 100): Promise<AuditLog[]> {
+    return this.getAudit(limit);
   }
 
   // Roles & Permissions
-  public getRoles(): Promise<RolePermission[]> {
-    return this.request<RolePermission[]>('/roles');
+  public async getRoles(): Promise<RolePermission[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<RolePermission[]>('/roles');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /roles, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getRoles();
   }
 
-  public createRole(data: Partial<RolePermission>): Promise<RolePermission> {
-    return this.request<RolePermission>('/roles', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createRole(data: Partial<RolePermission>): Promise<RolePermission> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<RolePermission>('/roles', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /roles, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createRole(data);
   }
 
-  public updateRole(id: string, data: Partial<RolePermission>): Promise<RolePermission> {
-    return this.request<RolePermission>(`/roles/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+  public async updateRole(id: string, data: Partial<RolePermission>): Promise<RolePermission> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<RolePermission>(`/roles/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /roles, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateRole(id, data);
   }
 
-  public deleteRole(id: string): Promise<{ success: boolean; deletedId: string }> {
-    return this.request<{ success: boolean; deletedId: string }>(`/roles/${id}`, {
-      method: 'DELETE',
-    });
+  public async deleteRole(id: string): Promise<{ success: boolean; deletedId: string }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<{ success: boolean; deletedId: string }>(`/roles/${id}`, { method: 'DELETE' });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend DELETE /roles, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.deleteRole(id);
   }
 
   // Stores
-  public getStores(): Promise<{ stores: Store[]; warehouses: Warehouse[] }> {
-    return this.request<{ stores: Store[]; warehouses: Warehouse[] }>('/stores');
+  public async getStores(): Promise<{ stores: Store[]; warehouses: Warehouse[] }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<{ stores: Store[]; warehouses: Warehouse[] }>('/stores');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /stores, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getStores();
   }
 
-  public createStore(data: Partial<Store>): Promise<Store> {
-    return this.request<Store>('/stores', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createStore(data: Partial<Store>): Promise<Store> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<Store>('/stores', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /stores, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createStore(data);
   }
 
   // Categories
-  public getCategories(): Promise<Category[]> {
-    return this.request<Category[]>('/categories');
+  public async getCategories(): Promise<Category[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<Category[]>('/categories');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /categories, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getCategories();
   }
 
   // Suppliers
-  public getSuppliers(): Promise<Supplier[]> {
-    return this.request<Supplier[]>('/suppliers');
+  public async getSuppliers(): Promise<Supplier[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<Supplier[]>('/suppliers');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /suppliers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getSuppliers();
   }
 
-  public createSupplier(data: Partial<Supplier>): Promise<Supplier> {
-    return this.request<Supplier>('/suppliers', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createSupplier(data: Partial<Supplier>): Promise<Supplier> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const sup = await this.request<Supplier>('/suppliers', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+        clientDb.createSupplier(sup);
+        return sup;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /suppliers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createSupplier(data);
   }
 
-  public updateSupplier(id: string, data: Partial<Supplier>): Promise<Supplier> {
-    return this.request<Supplier>(`/suppliers/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+  public async updateSupplier(id: string, data: Partial<Supplier>): Promise<Supplier> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const sup = await this.request<Supplier>(`/suppliers/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+        clientDb.updateSupplier(id, data);
+        return sup;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /suppliers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateSupplier(id, data);
   }
 
   // Products
-  public getProducts(params?: { q?: string; category?: string; supplier?: string; status?: string; storeId?: string }): Promise<(Product & {
+  public async getProducts(params?: { q?: string; category?: string; supplier?: string; status?: string; storeId?: string }): Promise<(Product & {
     totalPhysicalStock: number;
     totalAvailableStock: number;
     totalReservedStock: number;
@@ -191,57 +382,96 @@ class ApiService {
     potentialSaleValue: number;
     potentialGrossProfit: number;
   })[]> {
-    const searchParams = new URLSearchParams();
-    if (params?.q) searchParams.set('q', params.q);
-    if (params?.category) searchParams.set('category', params.category);
-    if (params?.supplier) searchParams.set('supplier', params.supplier);
-    if (params?.status) searchParams.set('status', params.status);
-    if (params?.storeId) searchParams.set('storeId', params.storeId);
-    return this.request(`/products?${searchParams.toString()}`);
+    if (await this.isBackendAvailable()) {
+      try {
+        const searchParams = new URLSearchParams();
+        if (params?.q) searchParams.set('q', params.q);
+        if (params?.category) searchParams.set('category', params.category);
+        if (params?.supplier) searchParams.set('supplier', params.supplier);
+        if (params?.status) searchParams.set('status', params.status);
+        if (params?.storeId) searchParams.set('storeId', params.storeId);
+        return await this.request(`/products?${searchParams.toString()}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /products, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getProducts(params);
   }
 
-  public createProduct(data: any): Promise<Product> {
-    return this.request<Product>('/products', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createProduct(data: any): Promise<Product> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const prod = await this.request<Product>('/products', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+        clientDb.createProduct(prod);
+        return prod;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /products, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createProduct(data);
   }
 
-  public updateProduct(id: string, data: Partial<Product>): Promise<Product> {
-    return this.request<Product>(`/products/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+  public async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const prod = await this.request<Product>(`/products/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+        clientDb.updateProduct(id, data);
+        return prod;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /products, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateProduct(id, data);
   }
 
   // Stock
-  public getStockBalances(storeId?: string, warehouseId?: string): Promise<(StockBalance & {
+  public async getStockBalances(storeId?: string, warehouseId?: string): Promise<(StockBalance & {
     product?: Product;
     storeName: string;
     warehouseName: string;
     totalCostValue: number;
     totalSaleValue: number;
   })[]> {
-    const searchParams = new URLSearchParams();
-    if (storeId) searchParams.set('storeId', storeId);
-    if (warehouseId) searchParams.set('warehouseId', warehouseId);
-    return this.request(`/stock/balances?${searchParams.toString()}`);
+    if (await this.isBackendAvailable()) {
+      try {
+        const searchParams = new URLSearchParams();
+        if (storeId) searchParams.set('storeId', storeId);
+        if (warehouseId) searchParams.set('warehouseId', warehouseId);
+        return await this.request(`/stock/balances?${searchParams.toString()}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /stock/balances, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getStockBalances(storeId, warehouseId);
   }
 
-  public getStockMovements(params?: { productId?: string; storeId?: string }): Promise<(StockMovement & {
+  public async getStockMovements(params?: { productId?: string; storeId?: string }): Promise<(StockMovement & {
     productName: string;
     productEan?: string;
     productUnit: string;
     storeName: string;
     warehouseName: string;
   })[]> {
-    const searchParams = new URLSearchParams();
-    if (params?.productId) searchParams.set('productId', params.productId);
-    if (params?.storeId) searchParams.set('storeId', params.storeId);
-    return this.request(`/stock/movements?${searchParams.toString()}`);
+    if (await this.isBackendAvailable()) {
+      try {
+        const searchParams = new URLSearchParams();
+        if (params?.productId) searchParams.set('productId', params.productId);
+        if (params?.storeId) searchParams.set('storeId', params.storeId);
+        return await this.request(`/stock/movements?${searchParams.toString()}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /stock/movements, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getStockMovements(params);
   }
 
-  public createStockMovement(data: {
+  public async createStockMovement(data: {
     productId: string;
     storeId: string;
     warehouseId: string;
@@ -253,14 +483,23 @@ class ApiService {
     authorizedBy?: string;
     allowNegative?: boolean;
   }): Promise<StockMovement> {
-    return this.request<StockMovement>('/stock/movements', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    if (await this.isBackendAvailable()) {
+      try {
+        const mov = await this.request<StockMovement>('/stock/movements', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+        try { clientDb.createStockMovement(data); } catch (_) {}
+        return mov;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /stock/movements, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createStockMovement(data);
   }
 
   // Lots
-  public getStockLots(storeId?: string): Promise<(StockLot & {
+  public async getStockLots(storeId?: string): Promise<(StockLot & {
     daysUntilExpiry: number;
     productName: string;
     productEan?: string;
@@ -269,38 +508,73 @@ class ApiService {
     warehouseName: string;
     totalCostValue: number;
   })[]> {
-    const searchParams = new URLSearchParams();
-    if (storeId) searchParams.set('storeId', storeId);
-    return this.request(`/stock/lots?${searchParams.toString()}`);
+    if (await this.isBackendAvailable()) {
+      try {
+        const searchParams = new URLSearchParams();
+        if (storeId) searchParams.set('storeId', storeId);
+        return await this.request(`/stock/lots?${searchParams.toString()}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /stock/lots, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getStockLots(storeId);
   }
 
-  public createStockLot(data: any): Promise<StockLot> {
-    return this.request<StockLot>('/stock/lots', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createStockLot(data: any): Promise<StockLot> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<StockLot>('/stock/lots', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /stock/lots, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createStockLot(data);
   }
 
   // Purchases
-  public getPurchases(): Promise<PurchaseOrder[]> {
-    return this.request<PurchaseOrder[]>('/purchases');
+  public async getPurchases(): Promise<PurchaseOrder[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<PurchaseOrder[]>('/purchases');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /purchases, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getPurchases();
   }
 
-  public createPurchase(data: any): Promise<PurchaseOrder> {
-    return this.request<PurchaseOrder>('/purchases', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createPurchase(data: any): Promise<PurchaseOrder> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<PurchaseOrder>('/purchases', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /purchases, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createPurchase(data);
   }
 
-  public updatePurchaseStatus(id: string, status: PurchaseOrder['status']): Promise<PurchaseOrder> {
-    return this.request<PurchaseOrder>(`/purchases/${id}/status`, {
-      method: 'PUT',
-      body: JSON.stringify({ status }),
-    });
+  public async updatePurchaseStatus(id: string, status: PurchaseOrder['status']): Promise<PurchaseOrder> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<PurchaseOrder>(`/purchases/${id}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status }),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /purchases/status, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updatePurchaseStatus(id, status);
   }
 
-  public receivePurchase(id: string, data: {
+  public async receivePurchase(id: string, data: {
     documentNumber: string;
     targetWarehouseId?: string;
     receivedItems: {
@@ -312,206 +586,428 @@ class ApiService {
       expirationDate?: string;
     }[];
   }): Promise<{ success: boolean; order: PurchaseOrder }> {
-    return this.request(`/purchases/${id}/receive`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request(`/purchases/${id}/receive`, {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /purchases/receive, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.receivePurchase(id, data);
   }
 
   // Losses
-  public getLosses(): Promise<(StockLoss & {
+  public async getLosses(): Promise<(StockLoss & {
     productName: string;
     productUnit: string;
     categoryName: string;
     storeName: string;
   })[]> {
-    return this.request('/losses');
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request('/losses');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /losses, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getLosses();
   }
 
-  public createLoss(data: any): Promise<StockLoss> {
-    return this.request<StockLoss>('/losses', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createLoss(data: any): Promise<StockLoss> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<StockLoss>('/losses', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /losses, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createLoss(data);
   }
 
   // Inventory
-  public getInventorySessions(): Promise<InventorySession[]> {
-    return this.request<InventorySession[]>('/inventory');
+  public async getInventorySessions(): Promise<InventorySession[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<InventorySession[]>('/inventory');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /inventory, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getInventorySessions();
   }
 
-  public createInventorySession(data: {
+  public async createInventorySession(data: {
     storeId: string;
     type: InventorySession['type'];
     targetCategoryId?: string;
     targetWarehouseId?: string;
   }): Promise<InventorySession> {
-    return this.request<InventorySession>('/inventory', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<InventorySession>('/inventory', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /inventory, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createInventorySession(data);
   }
 
-  public updateInventoryCounts(sessionId: string, items: {
+  public async updateInventoryCounts(sessionId: string, items: {
     productId: string;
     finalCountQty: number;
     countedBy?: string;
   }[]): Promise<InventorySession> {
-    return this.request<InventorySession>(`/inventory/${sessionId}/counts`, {
-      method: 'PUT',
-      body: JSON.stringify({ items }),
-    });
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<InventorySession>(`/inventory/${sessionId}/counts`, {
+          method: 'PUT',
+          body: JSON.stringify({ items }),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /inventory/counts, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateInventoryCounts(sessionId, items);
   }
 
-  public approveInventorySession(sessionId: string): Promise<InventorySession> {
-    return this.request<InventorySession>(`/inventory/${sessionId}/approve`, {
-      method: 'POST',
-    });
+  public async approveInventorySession(sessionId: string): Promise<InventorySession> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<InventorySession>(`/inventory/${sessionId}/approve`, {
+          method: 'POST',
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /inventory/approve, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.approveInventorySession(sessionId);
   }
 
   // Transfers
-  public getTransfers(): Promise<StockTransfer[]> {
-    return this.request<StockTransfer[]>('/transfers');
+  public async getTransfers(): Promise<StockTransfer[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<StockTransfer[]>('/transfers');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /transfers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getTransfers();
   }
 
-  public createTransfer(data: any): Promise<StockTransfer> {
-    return this.request<StockTransfer>('/transfers', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createTransfer(data: any): Promise<StockTransfer> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<StockTransfer>('/transfers', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /transfers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createTransfer(data);
   }
 
-  public receiveTransfer(id: string): Promise<StockTransfer> {
-    return this.request<StockTransfer>(`/transfers/${id}/receive`, {
-      method: 'PUT',
-    });
+  public async receiveTransfer(id: string): Promise<StockTransfer> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<StockTransfer>(`/transfers/${id}/receive`, {
+          method: 'PUT',
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /transfers/receive, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.receiveTransfer(id);
   }
 
   // Replenishment & ABC
-  public getReplenishment(storeId?: string): Promise<ReplenishmentSuggestion[]> {
-    const searchParams = new URLSearchParams();
-    if (storeId) searchParams.set('storeId', storeId);
-    return this.request(`/analytics/replenishment?${searchParams.toString()}`);
+  public async getReplenishment(storeId?: string): Promise<ReplenishmentSuggestion[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const searchParams = new URLSearchParams();
+        if (storeId) searchParams.set('storeId', storeId);
+        return await this.request(`/analytics/replenishment?${searchParams.toString()}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /analytics/replenishment, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getReplenishment(storeId);
   }
 
-  public getAbc(storeId?: string): Promise<{ items: AbcItem[]; summary: { aCount: number; bCount: number; cCount: number; totalValuation: number } }> {
-    const searchParams = new URLSearchParams();
-    if (storeId) searchParams.set('storeId', storeId);
-    return this.request(`/analytics/abc?${searchParams.toString()}`);
+  public async getAbc(storeId?: string): Promise<{ items: AbcItem[]; summary: { aCount: number; bCount: number; cCount: number; totalValuation: number } }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const searchParams = new URLSearchParams();
+        if (storeId) searchParams.set('storeId', storeId);
+        return await this.request(`/analytics/abc?${searchParams.toString()}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /analytics/abc, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getAbc(storeId);
   }
 
   // Audit & Notifications
-  public getAudit(limit?: number): Promise<AuditLog[]> {
-    return this.request<AuditLog[]>(`/audit?limit=${limit || 100}`);
+  public async getAudit(limit?: number): Promise<AuditLog[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<AuditLog[]>(`/audit?limit=${limit || 100}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /audit, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getAudit(limit || 100);
   }
 
-  public getNotifications(): Promise<SystemNotification[]> {
-    return this.request<SystemNotification[]>('/notifications');
+  public async getNotifications(): Promise<SystemNotification[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<SystemNotification[]>('/notifications');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /notifications, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getNotifications();
   }
 
-  public markNotificationRead(id: string): Promise<{ success: boolean }> {
-    return this.request(`/notifications/${id}/read`, { method: 'PUT' });
+  public async markNotificationRead(id: string): Promise<{ success: boolean }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request(`/notifications/${id}/read`, { method: 'PUT' });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /notifications/read, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.markNotificationRead(id);
   }
 
   // AI Intelligence
-  public queryIntelligence(prompt: string, storeId?: string): Promise<{ text: string; fallback?: boolean }> {
-    return this.request('/intelligence/query', {
-      method: 'POST',
-      body: JSON.stringify({ prompt, storeId }),
-    });
+  public async queryIntelligence(prompt: string, storeId?: string): Promise<{ text: string; fallback?: boolean }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request('/intelligence/query', {
+          method: 'POST',
+          body: JSON.stringify({ prompt, storeId }),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /intelligence/query, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.queryIntelligence(prompt, storeId);
   }
 
   // Backup & Restore
   public getBackupExportUrl(): string {
+    if (this.backendAvailable === false || (typeof window !== 'undefined' && window.location.hostname.includes('netlify.app'))) {
+      const data = clientDb.getBackupData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      return URL.createObjectURL(blob);
+    }
     return '/api/backup/export';
   }
 
-  public restoreBackup(data: any): Promise<{ success: boolean; message: string }> {
-    return this.request('/backup/import', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async restoreBackup(data: any): Promise<{ success: boolean; message: string }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const res = await this.request<{ success: boolean; message: string }>('/backup/import', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+        clientDb.restoreBackup(data);
+        return res;
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /backup/import, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.restoreBackup(data);
   }
 
-  // ==========================================
-  // Labels Module (Gestão & Impressão de Etiquetas)
-  // ==========================================
-  public getLabelDashboard(storeId?: string): Promise<LabelDashboardStats> {
-    const q = storeId ? `?storeId=${storeId}` : '';
-    return this.request<LabelDashboardStats>(`/labels/dashboard${q}`);
+  // Labels Module
+  public async getLabelDashboard(storeId?: string): Promise<LabelDashboardStats> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const q = storeId ? `?storeId=${storeId}` : '';
+        return await this.request<LabelDashboardStats>(`/labels/dashboard${q}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /labels/dashboard, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getLabelDashboard(storeId);
   }
 
-  public getLabelTemplates(): Promise<LabelTemplate[]> {
-    return this.request<LabelTemplate[]>('/labels/templates');
+  public async getLabelTemplates(): Promise<LabelTemplate[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelTemplate[]>('/labels/templates');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /labels/templates, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getLabelTemplates();
   }
 
-  public createLabelTemplate(data: Partial<LabelTemplate>): Promise<LabelTemplate> {
-    return this.request<LabelTemplate>('/labels/templates', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createLabelTemplate(data: Partial<LabelTemplate>): Promise<LabelTemplate> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelTemplate>('/labels/templates', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /labels/templates, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createLabelTemplate(data);
   }
 
-  public updateLabelTemplate(id: string, data: Partial<LabelTemplate>): Promise<LabelTemplate> {
-    return this.request<LabelTemplate>(`/labels/templates/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+  public async updateLabelTemplate(id: string, data: Partial<LabelTemplate>): Promise<LabelTemplate> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelTemplate>(`/labels/templates/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /labels/templates, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateLabelTemplate(id, data);
   }
 
-  public deleteLabelTemplate(id: string): Promise<{ success: boolean; deletedId: string }> {
-    return this.request(`/labels/templates/${id}`, { method: 'DELETE' });
+  public async deleteLabelTemplate(id: string): Promise<{ success: boolean; deletedId: string }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request(`/labels/templates/${id}`, { method: 'DELETE' });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend DELETE /labels/templates, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.deleteLabelTemplate(id);
   }
 
-  public getLabelPrinters(): Promise<LabelPrinter[]> {
-    return this.request<LabelPrinter[]>('/labels/printers');
+  public async getLabelPrinters(): Promise<LabelPrinter[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelPrinter[]>('/labels/printers');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /labels/printers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getLabelPrinters();
   }
 
-  public createLabelPrinter(data: Partial<LabelPrinter>): Promise<LabelPrinter> {
-    return this.request<LabelPrinter>('/labels/printers', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  public async createLabelPrinter(data: Partial<LabelPrinter>): Promise<LabelPrinter> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelPrinter>('/labels/printers', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /labels/printers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createLabelPrinter(data);
   }
 
-  public updateLabelPrinter(id: string, data: Partial<LabelPrinter>): Promise<LabelPrinter> {
-    return this.request<LabelPrinter>(`/labels/printers/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+  public async updateLabelPrinter(id: string, data: Partial<LabelPrinter>): Promise<LabelPrinter> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelPrinter>(`/labels/printers/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend PUT /labels/printers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.updateLabelPrinter(id, data);
   }
 
-  public deleteLabelPrinter(id: string): Promise<{ success: boolean; deletedId: string }> {
-    return this.request(`/labels/printers/${id}`, { method: 'DELETE' });
+  public async deleteLabelPrinter(id: string): Promise<{ success: boolean; deletedId: string }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request(`/labels/printers/${id}`, { method: 'DELETE' });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend DELETE /labels/printers, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.deleteLabelPrinter(id);
   }
 
-  public testLabelPrinter(id: string): Promise<{ success: boolean; status: string; latencyMs: number; message: string }> {
-    return this.request(`/labels/printers/${id}/test`, { method: 'POST' });
+  public async testLabelPrinter(id: string): Promise<{ success: boolean; status: string; latencyMs: number; message: string }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request(`/labels/printers/${id}/test`, { method: 'POST' });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /labels/printers/test, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.testLabelPrinter(id);
   }
 
-  public getLabelPriceChanges(params?: { status?: string; changeType?: string }): Promise<LabelPriceChange[]> {
-    const q = new URLSearchParams();
-    if (params?.status) q.set('status', params.status);
-    if (params?.changeType) q.set('changeType', params.changeType);
-    return this.request<LabelPriceChange[]>(`/labels/price-changes?${q.toString()}`);
+  public async getLabelPriceChanges(params?: { status?: string; changeType?: string }): Promise<LabelPriceChange[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        const q = new URLSearchParams();
+        if (params?.status) q.set('status', params.status);
+        if (params?.changeType) q.set('changeType', params.changeType);
+        return await this.request<LabelPriceChange[]>(`/labels/price-changes?${q.toString()}`);
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /labels/price-changes, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getLabelPriceChanges(params);
   }
 
-  public markPriceChangesPrinted(ids: string[], printJobId?: string): Promise<{ success: boolean; count: number }> {
-    return this.request('/labels/price-changes/mark-printed', {
-      method: 'POST',
-      body: JSON.stringify({ ids, printJobId }),
-    });
+  public async markPriceChangesPrinted(ids: string[], printJobId?: string): Promise<{ success: boolean; count: number }> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request('/labels/price-changes/mark-printed', {
+          method: 'POST',
+          body: JSON.stringify({ ids, printJobId }),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /labels/price-changes/mark-printed, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.markPriceChangesPrinted(ids, printJobId);
   }
 
-  public getLabelPromotions(): Promise<Product[]> {
-    return this.request<Product[]>('/labels/promotions');
+  public async getLabelPromotions(): Promise<Product[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<Product[]>('/labels/promotions');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /labels/promotions, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getLabelPromotions();
   }
 
-  public getLabelJobs(): Promise<LabelPrintJob[]> {
-    return this.request<LabelPrintJob[]>('/labels/jobs');
+  public async getLabelJobs(): Promise<LabelPrintJob[]> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelPrintJob[]>('/labels/jobs');
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend /labels/jobs, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.getLabelJobs();
   }
 
-  public createLabelJob(data: {
+  public async createLabelJob(data: {
     storeId: string;
     printerId: string;
     templateId: string;
@@ -519,18 +1015,31 @@ class ApiService {
     items: any[];
     simulateFailure?: boolean;
   }): Promise<LabelPrintJob> {
-    return this.request<LabelPrintJob>('/labels/jobs', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelPrintJob>('/labels/jobs', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend POST /labels/jobs, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.createLabelJob(data);
   }
 
-  public retryFailedJobItems(jobId: string): Promise<LabelPrintJob> {
-    return this.request<LabelPrintJob>(`/labels/jobs/${jobId}/retry-pending`, {
-      method: 'POST',
-    });
+  public async retryFailedJobItems(jobId: string): Promise<LabelPrintJob> {
+    if (await this.isBackendAvailable()) {
+      try {
+        return await this.request<LabelPrintJob>(`/labels/jobs/${jobId}/retry-pending`, {
+          method: 'POST',
+        });
+      } catch (err) {
+        console.warn('[ASSX Tech] Falha no backend retry-pending, executando via ClientDB:', err);
+      }
+    }
+    return clientDb.retryFailedJobItems(jobId);
   }
 }
 
 export const api = new ApiService();
-
