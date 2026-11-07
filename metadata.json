@@ -1,0 +1,10 @@
+{
+  "name": "Remix Remix Remix ASSX Tech Supermercados",
+  "description": "Plataforma empresarial completa de gestão inteligente de estoque e operações de supermercados.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

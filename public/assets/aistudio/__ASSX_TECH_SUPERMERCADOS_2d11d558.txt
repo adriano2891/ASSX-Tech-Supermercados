@@ -1,0 +1,1135 @@
+# ASSX TECH SUPERMERCADOS
+# PROMPT MASTER DEFINITIVO
+## DESENVOLVIMENTO DE UMA PLATAFORMA COMPLETA DE GESTÃO INTELIGENTE DE SUPERMERCADOS
+
+Atue como uma equipe multidisciplinar de especialistas sêniores em arquitetura de software, engenharia de sistemas, desenvolvimento full-stack, banco de dados, segurança da informação, UX/UI, inteligência artificial e gestão operacional de supermercados.
+
+Sua missão é PROJETAR, DESENVOLVER, IMPLEMENTAR, TESTAR E ENTREGAR uma plataforma empresarial chamada:
+
+**ASSX Tech Supermercados**
+
+O objetivo é construir um sistema profissional, completo, moderno, seguro, escalável e totalmente funcional para administração e controle de estoque de supermercados.
+
+O projeto deverá ser desenvolvido para utilização real em ambiente comercial, com banco de dados persistente, regras de negócio consistentes, módulos integrados e operações efetivamente funcionais.
+
+Não desenvolver somente um protótipo visual.
+
+Não criar funcionalidades fictícias.
+
+Não utilizar dados simulados como se fossem informações reais da operação.
+
+Todos os botões, formulários, filtros, relatórios, gráficos, cadastros, movimentações e configurações deverão possuir funcionamento efetivo.
+
+---
+
+# 1. VISÃO ESTRATÉGICA DO PROJETO
+
+Desenvolver uma plataforma independente de gestão de estoque e operações de supermercado, com arquitetura preparada para crescimento.
+
+CONFIGURAÇÕES DEFINIDAS:
+
+- Nome: ASSX Tech Supermercados.
+- Operação inicial: um supermercado.
+- Expansão futura: múltiplas lojas, filiais e empresas.
+- Modelo: SaaS empresarial escalável.
+- PDV: standalone, sem integração ativa nesta primeira versão.
+- Interface: híbrida, com tema claro e escuro.
+- Idioma: português brasileiro.
+- Moeda: Real brasileiro (R$).
+- Formato de data: DD/MM/AAAA.
+- Fuso horário padrão: America/Sao_Paulo, configurável por unidade.
+- Dispositivos: computadores, notebooks, tablets e smartphones.
+- Banco de dados: PostgreSQL.
+- Infraestrutura preferencial: Supabase, após avaliação da infraestrutura existente.
+
+O sistema deverá permitir administrar integralmente o estoque, produtos, fornecedores, compras, recebimentos, movimentações, inventários, perdas, validades, custos e indicadores gerenciais.
+
+Deverá funcionar inicialmente com uma única loja, sem precisar reconstruir sua arquitetura quando novas unidades forem adicionadas.
+
+# 2. ARQUITETURA TECNOLÓGICA
+
+Utilizar uma arquitetura moderna, modular, organizada e escalável.
+
+Tecnologias recomendadas:
+
+FRONTEND:
+- React.
+- TypeScript.
+- Tailwind CSS.
+- shadcn/ui ou biblioteca equivalente.
+- Componentes reutilizáveis.
+- Recharts para gráficos.
+
+BACKEND:
+- API segura.
+- Serviços centralizados.
+- Regras de negócio independentes da interface.
+- Validação no servidor.
+- Processamento transacional.
+
+BANCO DE DADOS:
+- PostgreSQL.
+- Supabase, se aprovado.
+- Migrations versionadas.
+- Índices e restrições.
+- Relacionamentos consistentes.
+- Políticas de acesso por empresa e unidade.
+
+INFRAESTRUTURA:
+- Hospedagem compatível com Vercel ou alternativas.
+- Git para versionamento.
+- Supabase Storage para imagens e documentos, se utilizado.
+- Rotinas de backup.
+- Monitoramento de erros.
+- Ambientes separados de desenvolvimento, homologação e produção.
+
+Antes de iniciar, analisar a infraestrutura existente. Não criar outro projeto de banco de dados, substituir serviços ou apagar estruturas existentes sem autorização.
+
+Organizar o código em módulos, serviços, componentes, hooks, tipos, validações e funções reutilizáveis.
+
+Não concentrar toda a lógica em um único arquivo.
+
+# 3. IDENTIDADE VISUAL E EXPERIÊNCIA DO USUÁRIO
+
+Criar uma identidade visual própria para ASSX Tech Supermercados.
+
+ESTILO:
+- Premium.
+- Tecnológico.
+- Empresarial.
+- Minimalista.
+- Moderno.
+- Intuitivo.
+- Profissional.
+
+PALETA PRINCIPAL:
+- Azul-marinho: #101D2B.
+- Azul tecnológico: #24445F.
+- Verde tecnológico: #28B88C.
+- Cinza claro: #F2F5F8.
+- Branco: #FFFFFF.
+
+Criar dois temas completos:
+
+TEMA ESCURO:
+Fundo azul-marinho, painéis escuros, tipografia clara, elementos verdes para ações positivas e indicadores.
+
+TEMA CLARO:
+Fundo branco ou cinza suave, cartões claros, textos em azul-marinho e detalhes verdes.
+
+O usuário deverá alternar entre os temas e salvar sua preferência individualmente.
+
+COMPONENTES VISUAIS:
+- Sidebar recolhível.
+- Navegação por módulos.
+- Dashboard com cards.
+- Tabelas profissionais.
+- Filtros avançados.
+- Pesquisa global.
+- Gráficos.
+- Modais.
+- Menus contextuais.
+- Notificações.
+- Indicadores de status.
+- Paginação.
+- Estados de carregamento.
+- Mensagens de sucesso e erro.
+- Confirmações de operações críticas.
+
+RESPONSIVIDADE:
+No desktop, priorizar produtividade, tabelas e indicadores.
+
+No tablet, adaptar menus, formulários e tabelas.
+
+No celular, utilizar navegação compacta, cartões adaptados, leitura de códigos de barras pela câmera e formulários simplificados.
+
+Nenhum módulo poderá desaparecer ou perder funcionalidades importantes na versão mobile.
+
+# 4. DASHBOARD EXECUTIVO
+
+Criar um painel principal com indicadores atualizados utilizando dados reais.
+
+INDICADORES:
+- Total de produtos cadastrados.
+- Total de unidades em estoque.
+- Valor financeiro do estoque pelo custo.
+- Valor potencial de venda.
+- Produtos com estoque crítico.
+- Produtos sem estoque.
+- Produtos com excesso de estoque.
+- Produtos próximos do vencimento.
+- Produtos vencidos.
+- Compras pendentes.
+- Recebimentos pendentes.
+- Entradas do dia.
+- Saídas do dia.
+- Perdas registradas.
+- Produtos sem movimentação.
+- Produtos mais movimentados.
+
+GRÁFICOS:
+- Evolução do valor do estoque.
+- Entradas versus saídas.
+- Movimentações por período.
+- Estoque por categoria.
+- Distribuição por depósito.
+- Produtos com maior índice de perdas.
+- Compras por fornecedor.
+- Evolução dos custos.
+
+Permitir filtros por:
+- Data.
+- Produto.
+- Categoria.
+- Fornecedor.
+- Filial.
+- Depósito.
+
+Adicionar painel de alertas prioritários e atalhos para as principais operações.
+
+Os indicadores deverão refletir dados efetivamente registrados.
+
+# 5. MÓDULO DE PRODUTOS
+
+Criar cadastro completo e profissional.
+
+CAMPOS:
+- Nome.
+- Descrição.
+- Código interno.
+- SKU.
+- EAN/GTIN.
+- Códigos de barras adicionais.
+- Categoria.
+- Subcategoria.
+- Marca.
+- Fabricante.
+- Unidade de medida.
+- Tipo de embalagem.
+- Quantidade por embalagem.
+- Peso.
+- Volume.
+- Preço de custo.
+- Preço de venda.
+- Margem de lucro.
+- Markup.
+- Estoque mínimo.
+- Estoque máximo.
+- Estoque de segurança.
+- Ponto de reposição.
+- Fornecedor principal.
+- Imagem.
+- Status ativo ou inativo.
+
+RECURSOS:
+- Cadastro individual.
+- Cadastro em lote.
+- Importação por planilha.
+- Exportação.
+- Pesquisa por nome, SKU e código de barras.
+- Leitura por scanner.
+- Leitura pela câmera do celular.
+- Identificação de produtos duplicados.
+- Histórico de preços.
+- Histórico de movimentações.
+- Histórico de fornecedores.
+- Duplicação de cadastro com validação.
+
+Permitir produtos vendidos em diferentes unidades, como unidade, caixa, pacote, quilo, litro e grama, utilizando conversões controladas.
+
+# 6. CATEGORIAS, SUBCATEGORIAS E SETORES
+
+Criar gerenciamento hierárquico de categorias.
+
+Exemplos:
+- Mercearia.
+- Bebidas.
+- Açougue.
+- Hortifrúti.
+- Padaria.
+- Frios e laticínios.
+- Congelados.
+- Higiene.
+- Limpeza.
+- Bazar.
+- Pet shop.
+
+Permitir criar categorias e subcategorias livremente.
+
+Cada categoria poderá ter:
+- Nome.
+- Descrição.
+- Cor.
+- Ícone.
+- Status.
+
+Permitir reorganização e filtros por categoria.
+
+# 7. CONTROLE DE ESTOQUE
+
+Este é o núcleo principal da plataforma.
+
+Implementar:
+
+ENTRADAS:
+- Compra.
+- Devolução.
+- Ajuste positivo.
+- Transferência recebida.
+- Outras entradas autorizadas.
+
+SAÍDAS:
+- Consumo interno.
+- Perdas.
+- Avarias.
+- Vencimento.
+- Transferência enviada.
+- Devolução ao fornecedor.
+- Ajuste negativo.
+- Outras saídas autorizadas.
+
+CONTROLES:
+- Estoque físico.
+- Estoque reservado.
+- Estoque disponível.
+- Estoque bloqueado.
+- Estoque mínimo.
+- Estoque máximo.
+- Estoque de segurança.
+- Histórico completo.
+- Saldo por depósito.
+- Saldo por unidade.
+- Controle de lotes.
+
+Toda movimentação confirmada deverá atualizar os saldos automaticamente.
+
+Não permitir estoque negativo por padrão.
+
+Criar configuração para autorizações excepcionais, com registro do responsável.
+
+Implementar prevenção contra duplicidade, concorrência e inconsistência de saldos.
+
+Não permitir exclusão silenciosa de movimentações confirmadas.
+
+Correções deverão ser realizadas por estorno ou ajustes rastreáveis.
+
+# 8. RASTREABILIDADE E AUDITORIA
+
+Criar trilha de auditoria completa.
+
+Registrar:
+- Usuário responsável.
+- Data e horário.
+- Empresa.
+- Filial.
+- Depósito.
+- Operação executada.
+- Produto.
+- Quantidade anterior.
+- Quantidade movimentada.
+- Quantidade posterior.
+- Motivo.
+- Documento relacionado.
+- Usuário aprovador.
+- Identificador da operação.
+
+Exemplo:
+
+Um produto possui 100 unidades.
+
+Um funcionário registra uma saída de 30 unidades.
+
+O sistema deverá apresentar:
+- Saldo anterior: 100.
+- Saída: 30.
+- Saldo atual: 70.
+- Responsável.
+- Motivo.
+- Data e hora.
+- Autorização, quando exigida.
+
+Criar histórico de alterações em cadastros, preços, fornecedores, parâmetros e permissões.
+
+A auditoria deverá ser protegida contra alterações não autorizadas.
+
+# 9. FORNECEDORES
+
+Criar módulo completo para gerenciamento de fornecedores.
+
+CAMPOS:
+- Razão social.
+- Nome fantasia.
+- CNPJ.
+- Inscrição estadual.
+- Endereço.
+- Cidade.
+- Estado.
+- CEP.
+- Contato.
+- Telefone.
+- WhatsApp.
+- E-mail.
+- Condições de pagamento.
+- Prazo de entrega.
+- Observações.
+- Status.
+
+FUNCIONALIDADES:
+- Histórico de compras.
+- Produtos fornecidos.
+- Preços praticados.
+- Comparação entre fornecedores.
+- Histórico de reajustes.
+- Avaliação de fornecedores.
+- Prazo médio de entrega.
+- Registro de ocorrências.
+- Documentos anexados.
+
+Permitir identificar o fornecedor com melhor condição comercial considerando preço, prazo, qualidade e histórico.
+
+# 10. COMPRAS E COTAÇÕES
+
+Criar um módulo completo de compras.
+
+FLUXO:
+1. Identificação de necessidade.
+2. Solicitação de compra.
+3. Cotação.
+4. Comparação de preços.
+5. Aprovação.
+6. Emissão do pedido.
+7. Acompanhamento.
+8. Recebimento.
+9. Conferência.
+10. Atualização do estoque.
+
+Permitir:
+- Pedidos parciais.
+- Pedidos completos.
+- Cancelamentos.
+- Reprogramação de entrega.
+- Controle de pendências.
+- Histórico de preços.
+- Anexos.
+- Aprovações por alçada.
+
+Criar sugestão automática de compras com base no estoque disponível, consumo histórico, estoque de segurança, prazo de entrega e pedidos pendentes.
+
+Não emitir pedidos automaticamente sem autorização configurada.
+
+# 11. RECEBIMENTO DE MERCADORIAS
+
+Criar tela específica de recebimento.
+
+Permitir:
+- Selecionar pedido.
+- Conferir itens.
+- Conferir quantidades.
+- Registrar divergências.
+- Registrar avarias.
+- Registrar lotes.
+- Registrar fabricação.
+- Registrar validade.
+- Registrar custo real.
+- Recebimento parcial.
+- Recebimento total.
+- Anexar documentos.
+
+O estoque somente deverá ser atualizado após confirmação válida do recebimento.
+
+Registrar separadamente quantidades solicitadas, recebidas, recusadas e pendentes.
+
+# 12. CONTROLE DE LOTES E VALIDADES
+
+Criar rastreamento individual por lote.
+
+Informações:
+- Produto.
+- Lote.
+- Fabricação.
+- Vencimento.
+- Quantidade.
+- Fornecedor.
+- Documento de origem.
+- Depósito.
+- Status.
+
+Implementar FEFO: First Expire, First Out.
+
+Alertas configuráveis:
+- 30 dias.
+- 15 dias.
+- 7 dias.
+- 3 dias.
+- Produto vencido.
+
+Permitir configurar outros períodos.
+
+Criar painel de produtos próximos do vencimento.
+
+Identificar mercadorias que precisam de ação imediata.
+
+Impedir saídas normais de produtos vencidos e permitir tratamento especial autorizado para descarte ou devolução.
+
+# 13. PERDAS, AVARIAS E DESPERDÍCIOS
+
+Criar módulo de perdas.
+
+MOTIVOS:
+- Produto vencido.
+- Avaria.
+- Quebra.
+- Furto identificado.
+- Descarte.
+- Erro operacional.
+- Devolução não aproveitável.
+- Outros.
+
+Registrar:
+- Produto.
+- Lote.
+- Quantidade.
+- Custo unitário.
+- Valor total da perda.
+- Responsável.
+- Motivo.
+- Data.
+- Imagens.
+- Aprovação.
+
+Criar relatórios por período, categoria, produto, setor e responsável.
+
+Calcular impacto financeiro das perdas e apresentar indicadores de evolução.
+
+# 14. INVENTÁRIO FÍSICO E ROTATIVO
+
+Criar ferramentas para contagem de estoque.
+
+TIPOS:
+- Inventário geral.
+- Inventário rotativo.
+- Por categoria.
+- Por setor.
+- Por depósito.
+- Por produto.
+
+FUNCIONALIDADES:
+- Abertura de sessão.
+- Definição de responsáveis.
+- Contagem pelo computador.
+- Contagem pelo celular.
+- Leitura de código de barras.
+- Contagem por lote.
+- Primeira contagem.
+- Recontagem.
+- Comparação com saldo do sistema.
+- Identificação de divergências.
+- Aprovação.
+- Ajuste automático após aprovação.
+
+Registrar estoque teórico, físico e diferença.
+
+Permitir congelamento lógico do saldo de referência da sessão e tratamento correto das movimentações ocorridas durante o inventário.
+
+# 15. CURVA ABC E INTELIGÊNCIA DE ESTOQUE
+
+Implementar análise ABC.
+
+Classificar produtos conforme sua relevância financeira e operacional.
+
+Criar:
+- Curva ABC por valor movimentado.
+- Curva ABC por consumo.
+- Curva ABC por categoria.
+- Produtos de maior importância.
+- Produtos de baixa relevância.
+- Produtos parados.
+
+Permitir personalizar os critérios de classificação.
+
+Criar indicadores para identificar produtos que merecem maior atenção no controle.
+
+# 16. MOTOR INTELIGENTE DE REPOSIÇÃO
+
+Desenvolver um mecanismo de análise para:
+
+- Identificar necessidade de reposição.
+- Calcular ponto de pedido.
+- Sugerir quantidade de compra.
+- Considerar prazo de entrega.
+- Considerar estoque de segurança.
+- Considerar pedidos em aberto.
+- Considerar consumo médio.
+- Identificar sazonalidade quando houver dados suficientes.
+- Identificar risco de ruptura.
+- Identificar excesso de estoque.
+
+Apresentar justificativa para cada recomendação.
+
+Permitir que o gestor aceite, ajuste ou rejeite a sugestão.
+
+Não realizar compras automaticamente sem autorização.
+
+# 17. GESTÃO FINANCEIRA DO ESTOQUE
+
+Criar visão financeira específica.
+
+Apresentar:
+- Valor total pelo custo.
+- Valor potencial de venda.
+- Margem estimada.
+- Custo médio ponderado.
+- Evolução de custos.
+- Produtos com maior capital imobilizado.
+- Perdas financeiras.
+- Comparação de preços de aquisição.
+- Rentabilidade estimada.
+
+Implementar histórico de custos.
+
+Utilizar método de avaliação de estoque configurável e contabilmente adequado, com custo médio ponderado como opção padrão operacional.
+
+Não confundir margem com markup.
+
+Não tratar estimativas de lucro como resultados contábeis definitivos.
+
+# 18. MÚLTIPLAS LOJAS E DEPÓSITOS
+
+Preparar arquitetura para expansão.
+
+Permitir:
+- Cadastrar novas filiais.
+- Criar depósitos.
+- Criar setores.
+- Gerenciar estoques independentes.
+- Transferir mercadorias.
+- Comparar desempenho.
+- Consolidar relatórios.
+- Restringir usuários por unidade.
+
+FLUXO DE TRANSFERÊNCIA:
+1. Solicitação.
+2. Aprovação.
+3. Separação.
+4. Expedição.
+5. Transporte.
+6. Recebimento.
+7. Conferência.
+8. Conclusão.
+
+Enquanto a mercadoria estiver em trânsito, não deverá ser contabilizada como disponível na origem ou destino.
+
+Criar controle de mercadoria em trânsito.
+
+# 19. LEITOR DE CÓDIGO DE BARRAS
+
+Preparar suporte para:
+- Leitores USB.
+- Leitores Bluetooth.
+- Câmeras de celulares.
+- Códigos EAN/GTIN.
+- QR Codes, quando aplicável.
+
+Utilizar leitura rápida para:
+- Cadastro.
+- Entrada.
+- Saída.
+- Inventário.
+- Consulta.
+- Conferência.
+
+A leitura deverá funcionar com dispositivos comuns, sem depender de equipamentos proprietários.
+
+# 20. ETIQUETAS E IDENTIFICAÇÃO
+
+Criar módulo para geração e impressão de etiquetas.
+
+Permitir:
+- Nome do produto.
+- Código de barras.
+- Código interno.
+- Preço.
+- Unidade.
+- Validade, quando aplicável.
+- Identificação do lote.
+
+Criar modelos de impressão configuráveis.
+
+Preparar compatibilidade com impressoras térmicas e impressoras convencionais.
+
+# 21. RELATÓRIOS GERENCIAIS
+
+Criar central de relatórios.
+
+RELATÓRIOS OPERACIONAIS:
+- Estoque atual.
+- Entradas.
+- Saídas.
+- Transferências.
+- Ajustes.
+- Produtos críticos.
+- Produtos sem estoque.
+- Produtos parados.
+- Produtos próximos do vencimento.
+- Produtos vencidos.
+- Lotes.
+
+RELATÓRIOS DE COMPRAS:
+- Compras por fornecedor.
+- Pedidos pendentes.
+- Histórico de custos.
+- Variação de preços.
+- Prazo de entrega.
+
+RELATÓRIOS FINANCEIROS:
+- Valor do estoque.
+- Margem estimada.
+- Perdas financeiras.
+- Capital imobilizado.
+- Evolução de custos.
+
+RELATÓRIOS DE CONTROLE:
+- Inventários.
+- Divergências.
+- Movimentações por funcionário.
+- Auditoria.
+- Aprovações.
+
+Permitir:
+- Filtros.
+- Ordenação.
+- Agrupamentos.
+- Exportação PDF.
+- Exportação XLSX.
+- Exportação CSV.
+- Impressão.
+- Agendamento futuro de relatórios.
+
+# 22. CENTRAL DE NOTIFICAÇÕES
+
+Criar central de alertas.
+
+Categorias:
+- Estoque crítico.
+- Produto zerado.
+- Excesso de estoque.
+- Vencimento.
+- Produto vencido.
+- Pedido pendente.
+- Recebimento atrasado.
+- Divergência de inventário.
+- Perdas elevadas.
+- Movimentação suspeita.
+- Solicitação aguardando aprovação.
+
+Permitir:
+- Definir prioridades.
+- Configurar destinatários.
+- Marcar como lido.
+- Histórico.
+- Filtros.
+- Preferências individuais.
+
+Preparar integração futura com e-mail e WhatsApp.
+
+# 23. INTELIGÊNCIA ARTIFICIAL
+
+Criar uma área chamada ASSX Intelligence.
+
+Objetivo: transformar os dados do estoque em informações úteis para o gestor.
+
+FUNCIONALIDADES:
+- Identificar produtos com risco de ruptura.
+- Sugerir reposição.
+- Detectar excesso.
+- Identificar produtos parados.
+- Analisar perdas.
+- Comparar fornecedores.
+- Identificar aumento de custos.
+- Analisar comportamento de consumo.
+- Gerar resumos gerenciais.
+- Responder perguntas sobre dados autorizados.
+
+Exemplos de perguntas:
+- Quais produtos estão com estoque crítico?
+- Quanto dinheiro está parado no estoque?
+- Quais produtos mais geraram perdas?
+- Quais produtos precisam ser comprados?
+- Qual fornecedor apresentou maior aumento de preço?
+- Quais produtos estão próximos do vencimento?
+
+A IA deverá consultar dados reais por serviços seguros e respeitar as permissões do usuário.
+
+Não inventar números, movimentações ou conclusões.
+
+Quando os dados forem insuficientes, informar claramente.
+
+A IA não poderá realizar operações críticas sem confirmação e autorização.
+
+# 24. USUÁRIOS, PERFIS E PERMISSÕES
+
+Criar sistema de usuários.
+
+PERFIS INICIAIS:
+- Superadministrador.
+- Administrador.
+- Gerente.
+- Comprador.
+- Estoquista.
+- Conferente.
+- Auditor.
+
+Permitir criar novos perfis personalizados.
+
+Permissões individuais para:
+- Visualizar.
+- Cadastrar.
+- Editar.
+- Excluir quando permitido.
+- Aprovar.
+- Cancelar.
+- Exportar.
+- Movimentar.
+- Consultar relatórios.
+
+Controlar acesso por módulo, empresa, filial e depósito.
+
+Operações sensíveis deverão exigir autorização específica.
+
+# 25. MODO STANDALONE E FUTURA INTEGRAÇÃO COM PDV
+
+O sistema deverá funcionar integralmente sem integração com caixas.
+
+Não depender de sistemas de vendas externos.
+
+Não criar vendas fictícias para alimentar indicadores.
+
+Todas as saídas deverão ser registradas pelas operações próprias do sistema.
+
+Preparar uma arquitetura de integração futura com PDV, utilizando APIs documentadas, identificadores externos, eventos e mecanismos de idempotência.
+
+A integração somente deverá ser ativada em uma fase posterior, mediante autorização.
+
+# 26. INTEGRAÇÕES FISCAIS FUTURAS
+
+Preparar estrutura para:
+- Importação de XML de NF-e.
+- Conferência de produtos.
+- Identificação de fornecedores.
+- Importação de quantidades e custos.
+- Tratamento de divergências.
+- Histórico de documentos.
+
+Preparar compatibilidade futura com NF-e, NFC-e e demais necessidades fiscais.
+
+Não declarar integração fiscal completa sem implementação, testes e validação legal.
+
+# 27. BANCO DE DADOS E MODELAGEM
+
+Projetar banco relacional normalizado.
+
+TABELAS PRINCIPAIS:
+
+ORGANIZAÇÃO:
+- companies.
+- stores.
+- warehouses.
+- departments.
+
+USUÁRIOS:
+- users.
+- roles.
+- permissions.
+- user_roles.
+- user_store_access.
+
+PRODUTOS:
+- products.
+- categories.
+- subcategories.
+- brands.
+- product_barcodes.
+- units_of_measure.
+- product_suppliers.
+
+ESTOQUE:
+- stock_balances.
+- stock_movements.
+- stock_movement_items.
+- stock_lots.
+- stock_reservations.
+- stock_transfers.
+
+COMPRAS:
+- suppliers.
+- purchase_requests.
+- supplier_quotations.
+- purchase_orders.
+- purchase_items.
+- goods_receipts.
+- goods_receipt_items.
+
+INVENTÁRIO:
+- inventory_sessions.
+- inventory_counts.
+- inventory_adjustments.
+
+PERDAS:
+- stock_losses.
+- stock_loss_items.
+
+GESTÃO:
+- price_history.
+- notifications.
+- audit_logs.
+- system_settings.
+- attachments.
+
+Criar todos os relacionamentos, chaves estrangeiras, índices, restrições e políticas de segurança.
+
+Todas as tabelas operacionais deverão respeitar o isolamento por empresa e unidade.
+
+Não permitir que um usuário de uma empresa consulte dados de outra empresa.
+
+Implementar RLS quando utilizado Supabase.
+
+Criar migrations versionadas e documentação da estrutura.
+
+# 28. REGRAS DE INTEGRIDADE E SEGURANÇA
+
+OBRIGATÓRIO:
+
+- Autenticação segura.
+- Controle de permissões no backend.
+- Validação de todos os dados.
+- Proteção contra SQL Injection.
+- Proteção contra acesso indevido.
+- Controle de concorrência.
+- Operações transacionais.
+- Prevenção contra duplicidade.
+- Registro de auditoria.
+- Backup.
+- Recuperação.
+- Monitoramento.
+- Logs de erros.
+- Gestão de sessões.
+- Proteção de credenciais.
+- Separação entre ambiente de testes e produção.
+
+Nunca expor chaves privadas no frontend.
+
+Não permitir que a interface seja a única responsável pela segurança.
+
+Não permitir exclusão silenciosa de registros críticos.
+
+Não atualizar saldos por operações isoladas que possam deixar o histórico inconsistente.
+
+Criar rotinas de reconciliação entre saldo calculado pelas movimentações e saldo armazenado.
+
+# 29. FUNCIONAMENTO OFFLINE
+
+Preparar uma experiência mobile capaz de realizar consultas e contagens previamente autorizadas mesmo com conexão instável.
+
+Permitir armazenamento local controlado de dados necessários.
+
+Implementar fila de sincronização.
+
+Quando a conexão retornar:
+- Sincronizar operações.
+- Identificar conflitos.
+- Evitar duplicidade.
+- Validar permissões.
+- Informar falhas.
+- Preservar os registros pendentes.
+
+Não permitir que operações críticas conflitantes sejam aplicadas silenciosamente.
+
+O funcionamento offline deverá ser implementado de forma segura, especialmente para inventários e consultas, sem comprometer os saldos oficiais.
+
+# 30. BACKUP E CONTINUIDADE
+
+Criar estratégia de backup.
+
+Definir:
+- Frequência.
+- Retenção.
+- Segurança.
+- Recuperação.
+- Testes de restauração.
+- Registro das execuções.
+
+Documentar os procedimentos de recuperação de dados.
+
+Não considerar backup concluído sem testes de restauração.
+
+# 31. DESEMPENHO E ESCALABILIDADE
+
+Preparar o sistema para grande volume de produtos e movimentações.
+
+Utilizar:
+- Paginação no servidor.
+- Índices adequados.
+- Consultas otimizadas.
+- Cache quando apropriado.
+- Processamento assíncrono para tarefas demoradas.
+- Carregamento progressivo.
+- Otimização de imagens.
+- Monitoramento de desempenho.
+
+Evitar carregar todos os produtos e movimentações simultaneamente.
+
+# 32. METODOLOGIA DE DESENVOLVIMENTO
+
+Desenvolver por etapas, mas sempre preservando a arquitetura completa.
+
+FASE 1 — FUNDAÇÃO:
+Arquitetura, banco, autenticação, empresas, filiais, usuários, permissões e identidade visual.
+
+FASE 2 — CADASTROS:
+Produtos, categorias, subcategorias, marcas, unidades de medida e fornecedores.
+
+FASE 3 — ESTOQUE:
+Entradas, saídas, ajustes, reservas, transferências, saldos e auditoria.
+
+FASE 4 — COMPRAS:
+Cotações, pedidos, aprovações e recebimentos.
+
+FASE 5 — LOTES E INVENTÁRIOS:
+Validades, FEFO, inventário, contagem e divergências.
+
+FASE 6 — GESTÃO:
+Dashboard, indicadores, relatórios e notificações.
+
+FASE 7 — INTELIGÊNCIA:
+Curva ABC, reposição inteligente, análise de perdas e ASSX Intelligence.
+
+FASE 8 — RECURSOS AVANÇADOS:
+Etiquetas, leitor de código de barras, funcionamento offline e expansão multiunidade.
+
+FASE 9 — HOMOLOGAÇÃO:
+Testes, segurança, otimização, documentação e publicação.
+
+# 33. TESTES OBRIGATÓRIOS
+
+Criar testes automatizados e manuais.
+
+TESTAR:
+- Cadastro de produtos.
+- Duplicidade de códigos.
+- Entrada de mercadorias.
+- Saída de mercadorias.
+- Estoque negativo.
+- Transferências.
+- Recebimentos parciais.
+- Lotes.
+- Validades.
+- FEFO.
+- Inventários.
+- Ajustes.
+- Aprovações.
+- Permissões.
+- Auditoria.
+- Relatórios.
+- Exportações.
+- Concorrência.
+- Sincronização.
+- Isolamento entre empresas.
+- Responsividade.
+- Recuperação de dados.
+
+Criar cenários de teste para operações simultâneas de vários funcionários.
+
+Não marcar uma funcionalidade como concluída apenas porque sua tela foi criada.
+
+# 34. DOCUMENTAÇÃO
+
+Entregar documentação contendo:
+- Arquitetura.
+- Estrutura do projeto.
+- Modelo de dados.
+- Relacionamentos.
+- Regras de negócio.
+- APIs.
+- Permissões.
+- Procedimentos de instalação.
+- Configurações de ambiente.
+- Migrations.
+- Testes.
+- Backup e recuperação.
+- Manual do usuário.
+
+Criar também um guia de administração para configuração de empresas, unidades, depósitos e usuários.
+
+# 35. CRITÉRIOS DE ACEITAÇÃO
+
+O projeto somente poderá ser considerado operacional quando:
+
+1. Todos os módulos prioritários estiverem implementados.
+2. Os cadastros persistirem no banco.
+3. As movimentações atualizarem corretamente os saldos.
+4. O histórico de auditoria funcionar.
+5. As permissões forem respeitadas.
+6. Os relatórios utilizarem dados reais.
+7. Os alertas forem gerados corretamente.
+8. Os inventários permitirem reconciliação.
+9. Os dados estiverem isolados entre unidades e empresas.
+10. A interface funcionar em desktop e mobile.
+11. As operações simultâneas não causarem inconsistências.
+12. Os testes críticos forem aprovados.
+13. O backup e a restauração forem testados.
+14. A documentação estiver disponível.
+
+# 36. DIRETRIZES FINAIS DE EXECUÇÃO
+
+Antes de iniciar o desenvolvimento:
+
+- Analise o projeto existente.
+- Identifique a infraestrutura.
+- Verifique se existe banco Supabase conectado.
+- Avalie tecnologias e dependências.
+- Identifique riscos.
+- Apresente a arquitetura.
+- Defina o modelo de dados.
+- Apresente o planejamento de implementação.
+
+Durante o desenvolvimento:
+
+- Preserve estruturas existentes que estejam funcionando.
+- Não apague dados.
+- Não crie tabelas duplicadas.
+- Não substitua o banco sem autorização.
+- Não desenvolva módulos isolados sem integração.
+- Não utilize dados fictícios na operação real.
+- Não crie botões decorativos.
+- Não deixe funcionalidades incompletas sem identificação.
+- Não esconda erros.
+- Não declare sucesso sem confirmação do backend.
+- Corrija problemas encontrados antes de avançar.
+
+Ao finalizar cada etapa, apresentar:
+- Funcionalidades implementadas.
+- Arquivos e módulos criados.
+- Estruturas de banco modificadas.
+- Testes executados.
+- Resultados dos testes.
+- Problemas encontrados.
+- Pendências.
+- Próxima etapa.
+
+Não modificar funcionalidades já aprovadas sem necessidade técnica e sem informar o motivo.
+
+# 37. RESULTADO FINAL
+
+Entregar o ASSX Tech Supermercados como uma plataforma empresarial real, profissional, moderna, segura e escalável.
+
+A solução deverá oferecer controle integral do estoque, compras, fornecedores, lotes, validades, inventários, perdas, auditoria, custos, relatórios e inteligência operacional.
+
+Deverá iniciar com uma loja, funcionar independentemente de PDV e estar preparada para crescer para uma rede de supermercados.
+
+**A PRIORIDADE MÁXIMA É CONSTRUIR UM SISTEMA QUE FUNCIONE DE VERDADE, COM DADOS CONFIÁVEIS, OPERAÇÕES SEGURAS, INTERFACE INTUITIVA E ARQUITETURA PREPARADA PARA O CRESCIMENTO.**
+
+Não entregue apenas um layout.
+
+Não entregue apenas um protótipo.
+
+Entregue um produto empresarial funcional, testado, documentado e preparado para utilização operacional.

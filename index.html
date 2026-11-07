@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <script>
+      (function() {
+        try {
+          var _origFetch = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function() {
+              return _origFetch;
+            },
+            set: function(val) {
+              _origFetch = val;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (_) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASSX Tech Supermercados</title>
+    <meta name="description" content="Plataforma empresarial completa de gestão inteligente de estoque e operações de supermercados." />
+    <meta property="og:title" content="ASSX Tech Supermercados" />
+    <meta property="og:description" content="Plataforma empresarial completa de gestão inteligente de estoque e operações de supermercados." />
+    <link rel="icon" type="image/png" href="/assets/official_logo.png" />
+    <meta property="og:image" content="/assets/official_logo.png" />
+    <meta name="twitter:image" content="/assets/official_logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-[#F2F5F8] text-[#101D2B] dark:bg-[#101D2B] dark:text-[#F2F5F8] font-sans antialiased selection:bg-[#28B88C]/20 selection:text-[#28B88C]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
