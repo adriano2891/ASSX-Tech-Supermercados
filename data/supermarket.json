@@ -489,7 +489,7 @@
       "availableQty": 286,
       "blockedQty": 0,
       "avgCost": 22.8,
-      "updatedAt": "2026-11-08T09:29:50.669Z"
+      "updatedAt": "2026-11-08T09:39:46.666Z"
     },
     {
       "id": "sb-02",
@@ -639,6 +639,40 @@
     }
   ],
   "stockMovements": [
+    {
+      "id": "mov-1794130786666-445",
+      "productId": "prod-01",
+      "storeId": "store-01",
+      "warehouseId": "wh-01-gen",
+      "type": "adjustment_out",
+      "quantity": 5,
+      "previousBalance": 291,
+      "newBalance": 286,
+      "unitCost": 22.8,
+      "totalCost": 114,
+      "reason": "Compensação do teste de auditoria",
+      "authorizedBy": "Super Admin Test",
+      "userId": "usr-super",
+      "userName": "Super Admin Test",
+      "createdAt": "2026-11-08T09:39:46.666Z"
+    },
+    {
+      "id": "mov-1794130786664-148",
+      "productId": "prod-01",
+      "storeId": "store-01",
+      "warehouseId": "wh-01-gen",
+      "type": "adjustment_in",
+      "quantity": 5,
+      "previousBalance": 286,
+      "newBalance": 291,
+      "unitCost": 22.8,
+      "totalCost": 114,
+      "reason": "Auditoria automatizada de estoque",
+      "documentNumber": "AUDIT-TEST-001",
+      "userId": "usr-super",
+      "userName": "Super Admin Test",
+      "createdAt": "2026-11-08T09:39:46.664Z"
+    },
     {
       "id": "mov-1794130190669-145",
       "productId": "prod-01",
@@ -1162,6 +1196,44 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "aud-1794130786666-641",
+      "createdAt": "2026-11-08T09:39:46.666Z",
+      "action": "STOCK_MOVEMENT",
+      "module": "ESTOQUE",
+      "entityId": "mov-1794130786666-445",
+      "entityType": "StockMovement",
+      "storeId": "store-01",
+      "userId": "usr-super",
+      "userName": "Super Admin Test",
+      "userRole": "superadmin",
+      "details": "Movimentação ADJUSTMENT_OUT: Arroz Branco Tipo 1 Camil 5kg (Qtd: 5 PCT) | Saldo: 291 -> 286. Motivo: Compensação do teste de auditoria",
+      "previousState": {
+        "physicalQty": 291
+      },
+      "newState": {
+        "physicalQty": 286
+      }
+    },
+    {
+      "id": "aud-1794130786664-167",
+      "createdAt": "2026-11-08T09:39:46.664Z",
+      "action": "STOCK_MOVEMENT",
+      "module": "ESTOQUE",
+      "entityId": "mov-1794130786664-148",
+      "entityType": "StockMovement",
+      "storeId": "store-01",
+      "userId": "usr-super",
+      "userName": "Super Admin Test",
+      "userRole": "superadmin",
+      "details": "Movimentação ADJUSTMENT_IN: Arroz Branco Tipo 1 Camil 5kg (Qtd: 5 PCT) | Saldo: 286 -> 291. Motivo: Auditoria automatizada de estoque",
+      "previousState": {
+        "physicalQty": 286
+      },
+      "newState": {
+        "physicalQty": 291
+      }
+    },
     {
       "id": "aud-1794130190669-887",
       "createdAt": "2026-11-08T09:29:50.669Z",

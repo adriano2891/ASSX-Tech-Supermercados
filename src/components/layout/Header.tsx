@@ -50,12 +50,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
   };
 
   return (
-    <header className="h-16 px-4 md:px-6 border-b border-slate-200 dark:border-[#24445F] bg-white dark:bg-[#101D2B] flex items-center justify-between gap-4 sticky top-0 z-30 transition-colors">
+    <header className="h-14 sm:h-16 w-full max-w-full px-2 sm:px-4 md:px-6 border-b border-slate-200 dark:border-[#24445F] bg-white/95 dark:bg-[#101D2B]/95 backdrop-blur-md flex items-center justify-between gap-1.5 sm:gap-3 md:gap-4 sticky top-0 z-30 transition-colors">
       {/* Zone 1: Brand & Toggle Button */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 min-w-0">
         <button
           onClick={handleToggle}
-          className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#24445F]/50 transition-colors cursor-pointer"
+          className="p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#24445F]/50 transition-colors cursor-pointer shrink-0"
           aria-label={isSidebarCollapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
           title={isSidebarCollapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
         >
@@ -66,14 +66,14 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
           )}
         </button>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <img
             src="/assets/official_logo.png"
             alt="ASSX Tech Supermercados"
-            className="h-10 w-auto max-h-10 object-contain rounded-lg drop-shadow-sm transition-transform hover:scale-105"
+            className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 object-contain rounded-lg drop-shadow-sm shrink-0"
           />
-          <div className="flex flex-col">
-            <span className="font-extrabold text-base md:text-lg tracking-tight text-[#101D2B] dark:text-white whitespace-nowrap leading-tight">
+          <div className="flex flex-col min-w-0">
+            <span className="font-extrabold text-xs sm:text-sm md:text-base tracking-tight text-[#101D2B] dark:text-white whitespace-nowrap leading-tight">
               ASSX<span className="text-[#28B88C]">.TECH</span>
             </span>
             <span className="hidden md:inline text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400 leading-none">
@@ -82,20 +82,21 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
           </div>
         </div>
 
-        <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-[#24445F] mx-2" />
-        <span className="hidden sm:inline text-xs font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
+        {/* Active module title - only on large desktop screens to prevent mobile header crowding */}
+        <div className="hidden lg:block h-4 w-px bg-slate-200 dark:bg-[#24445F] mx-2 shrink-0" />
+        <span className="hidden lg:inline text-xs font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[180px] xl:max-w-[220px]">
           {activeModuleTitle}
         </span>
       </div>
 
       {/* Zone 2: Navigation Breadcrumb, Unit Identification & Store Switcher */}
-      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+      <div className="flex items-center gap-1 sm:gap-2 min-w-0">
         {/* Desktop-only toggle shortcut next to unit switcher */}
         <button
           onClick={toggleSidebar}
           title={isSidebarCollapsed ? "Expandir Barra Lateral" : "Recolher Barra Lateral (Tela Cheia)"}
           aria-label={isSidebarCollapsed ? "Expandir barra lateral" : "Recolher barra lateral"}
-          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#1A2E44] hover:bg-slate-200 dark:hover:bg-[#24445F] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#24445F] transition-all cursor-pointer shadow-xs active:scale-95"
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#1A2E44] hover:bg-slate-200 dark:hover:bg-[#24445F] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#24445F] transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
         >
           {isSidebarCollapsed ? (
             <>
@@ -111,12 +112,13 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
         </button>
 
         {/* Store selector */}
-        <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-[#1A2E44] px-2 sm:px-2.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-[#24445F]">
-          <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#28B88C] shrink-0" />
+        <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-[#1A2E44] px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-slate-200/80 dark:border-[#24445F] min-w-0 max-w-[105px] xs:max-w-[140px] sm:max-w-[180px] md:max-w-[220px]">
+          <Building2 className="w-3.5 h-3.5 text-[#28B88C] shrink-0" />
           <select
             value={currentStoreId}
             onChange={e => setCurrentStoreId(e.target.value)}
-            className="text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer max-w-[110px] sm:max-w-[170px] md:max-w-[220px] truncate"
+            className="text-[11px] sm:text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer w-full truncate"
+            aria-label="Selecionar Unidade ou Loja"
           >
             {stores.map(store => (
               <option key={store.id} value={store.id} className="bg-white dark:bg-[#101D2B] text-slate-900 dark:text-white">
@@ -126,36 +128,37 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
           </select>
         </div>
 
-        {/* Barcode scanner action button */}
+        {/* Barcode scanner action button - icon only on mobile, icon+label on sm+ */}
         <button
           onClick={() => openScanner()}
           title="Abrir Leitor de Código de Barras (Câmera / USB)"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#1A2E44] hover:bg-slate-200 dark:hover:bg-[#24445F] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#24445F] transition-colors whitespace-nowrap cursor-pointer"
+          aria-label="Abrir Leitor de Código de Barras"
+          className="flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#1A2E44] hover:bg-slate-200 dark:hover:bg-[#24445F] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#24445F] transition-colors whitespace-nowrap cursor-pointer shrink-0"
         >
-          <ScanLine className="w-4 h-4 text-[#28B88C]" />
-          <span className="hidden md:inline">Scanner</span>
+          <ScanLine className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#28B88C] shrink-0" />
+          <span className="hidden sm:inline">Scanner</span>
         </button>
       </div>
 
       {/* Zone 3: Controls (Notifications, Theme, User Role & Logout) */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 shrink-0">
         {/* Notifications toggle */}
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A2E44] transition-colors relative cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A2E44] transition-colors relative cursor-pointer"
             aria-label="Notificações"
           >
             <Bell className="w-4 h-4" />
             {unreadNotificationsCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center tabular-nums">
+              <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center tabular-nums shadow-xs">
                 {unreadNotificationsCount}
               </span>
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] rounded-2xl shadow-2xl p-4 z-50 text-xs">
+            <div className="absolute right-0 mt-2 w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] rounded-2xl shadow-2xl p-4 z-50 text-xs">
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-[#24445F]">
                 <span className="font-bold text-sm text-slate-900 dark:text-white">Alertas Operacionais</span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">{unreadNotificationsCount} não lidos</span>
@@ -194,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A2E44] transition-colors cursor-pointer"
+          className="p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A2E44] transition-colors cursor-pointer"
           title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
           aria-label="Alternar tema"
         >
@@ -205,10 +208,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 p-1.5 sm:px-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-[#1A2E44] transition-colors text-left cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-[#24445F]"
+            className="flex items-center gap-1.5 p-1 sm:px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-[#1A2E44] transition-colors text-left cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-[#24445F]"
             aria-label="Menu do Operador Ativo"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#24445F] to-[#101D2B] text-white flex items-center justify-center font-bold text-xs uppercase border border-[#28B88C]/30 shadow-xs">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-[#24445F] to-[#101D2B] text-white flex items-center justify-center font-bold text-xs uppercase border border-[#28B88C]/40 shadow-xs shrink-0">
               {currentUser.name.charAt(0)}
             </div>
             <div className="hidden lg:block text-xs">
@@ -241,7 +244,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
                       {currentUser.role.toUpperCase()}
                     </span>
                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Logado
                     </span>
                   </div>
