@@ -605,7 +605,7 @@ export const LabelsPage: React.FC = () => {
       </div>
 
       {/* 3. NAVIGATION SUBTABS (ATALHOS OPERACIONAIS) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 dark:border-[#24445F] text-xs font-semibold">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 dark:border-[#24445F] text-xs font-semibold scrollbar-none">
         {[
           { id: 'overview', label: 'Nova Impressão & Fila', icon: Tag, count: printQueue.length },
           { id: 'batch', label: 'Impressão em Lote', icon: Layers, highlight: true },
@@ -627,7 +627,7 @@ export const LabelsPage: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all ${
+              className={`shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all ${
                 isActive
                   ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm font-bold'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A2E44] hover:text-slate-900 dark:hover:text-white'

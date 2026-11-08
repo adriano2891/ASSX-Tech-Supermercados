@@ -245,7 +245,7 @@ export const ProductsPage: React.FC = () => {
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <select
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value)}
@@ -350,10 +350,10 @@ export const ProductsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Products Table with Enhanced Financial Columns */}
-      <div className="bg-white dark:bg-[#101D2B] rounded-2xl border border-slate-200 dark:border-[#24445F] shadow-xs overflow-hidden">
+      {/* Products Table with Enhanced Financial Columns (Desktop View) */}
+      <div className="hidden md:block bg-white dark:bg-[#101D2B] rounded-2xl border border-slate-200 dark:border-[#24445F] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs min-w-[1020px]">
             <thead className="bg-slate-50 dark:bg-[#1A2E44] border-b border-slate-200 dark:border-[#24445F] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3 px-3">Cód / SKU</th>
@@ -473,7 +473,7 @@ export const ProductsPage: React.FC = () => {
                           <button
                             onClick={() => openLabelModal(p)}
                             title="Imprimir Etiqueta de Gôndola / Código de Barras"
-                            className="p-1.5 text-slate-500 hover:text-[#28B88C] hover:bg-[#28B88C]/10 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-500 hover:text-[#28B88C] hover:bg-[#28B88C]/10 rounded-lg transition-colors cursor-pointer"
                           >
                             <Barcode className="w-4 h-4" />
                           </button>
@@ -483,7 +483,7 @@ export const ProductsPage: React.FC = () => {
                               setIsCreateModalOpen(true);
                             }}
                             title="Editar Dados do Produto"
-                            className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors cursor-pointer"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
@@ -522,6 +522,170 @@ export const ProductsPage: React.FC = () => {
             )}
           </table>
         </div>
+      </div>
+
+      {/* Products Cards (Mobile & Tablet View) */}
+      <div className="block md:hidden space-y-3">
+        {filteredProducts.length === 0 ? (
+          <div className="bg-white dark:bg-[#101D2B] rounded-2xl border border-slate-200 dark:border-[#24445F] p-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+            Nenhum produto encontrado com os filtros selecionados.
+          </div>
+        ) : (
+          filteredProducts.map(p => {
+            const cat = categories.find(c => c.id === p.categoryId);
+            const physical = Math.max(0, p.totalPhysicalStock || 0);
+            const cost = Math.max(0, p.costPrice || 0);
+            const sale = Math.max(0, p.salePrice || 0);
+            const totalCost = Number((physical * cost).toFixed(2));
+            const totalSale = Number((physical * sale).toFixed(2));
+            const grossProfit = Number((totalSale - totalCost).toFixed(2));
+            const grossMarginPct = sale > 0 ? Number((((sale - cost) / sale) * 100).toFixed(1)) : 0;
+            const markupPct = cost > 0 ? Number((((sale - cost) / cost) * 100).toFixed(1)) : 0;
+            const isStockCritical = physical <= p.minStock;
+
+            return (
+              <div
+                key={p.id}
+                className="bg-white dark:bg-[#101D2B] rounded-2xl border border-slate-200 dark:border-[#24445F] p-4 space-y-3 shadow-xs"
+              >
+                {/* Header: Title, Category & Codes */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-snug">
+                      {p.name}
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                      <span>Cód: <strong className="text-slate-800 dark:text-slate-200">{p.code}</strong></span>
+                      <span>·</span>
+                      <span>EAN: {p.ean}</span>
+                      {p.brand && (
+                        <>
+                          <span>·</span>
+                          <span>{p.brand}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <span className="shrink-0 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-100 dark:bg-[#1A2E44] text-slate-700 dark:text-slate-300">
+                    {cat?.name || 'Geral'}
+                  </span>
+                </div>
+
+                {/* Financial 2-Column Grid */}
+                <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100 dark:border-[#24445F]/60">
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-[#1A2E44]/40 border border-slate-200 dark:border-[#24445F]">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">Preço de Custo</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200 block text-xs">
+                      R$ {cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-[#1A2E44]/40 border border-slate-200 dark:border-[#24445F]">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">Preço de Venda</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white block text-xs">
+                      R$ {sale.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-[#1A2E44]/40 border border-slate-200 dark:border-[#24445F]">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">Margem & Markup</span>
+                    <span className="font-mono font-bold text-[#28B88C] block text-xs">
+                      {grossMarginPct.toFixed(1)}% <span className="text-slate-400 font-normal text-[10px]">MKP: {markupPct.toFixed(1)}%</span>
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-[#1A2E44]/40 border border-slate-200 dark:border-[#24445F]">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">Saldo Físico</span>
+                    <span className={`font-mono font-bold block text-xs ${isStockCritical ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>
+                      {physical.toLocaleString('pt-BR')} {p.unit}
+                    </span>
+                    {isStockCritical && (
+                      <span className="text-[9px] text-red-500 font-semibold block leading-tight">Abaixo do mín ({p.minStock})</span>
+                    )}
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-[#1A2E44]/40 border border-slate-200 dark:border-[#24445F]">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">Total a Custo</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200 block text-xs">
+                      R$ {totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50">
+                    <span className="text-[10px] text-blue-600 dark:text-blue-300 font-medium block">Venda Estimada</span>
+                    <span className="font-mono font-bold text-blue-700 dark:text-blue-300 block text-xs">
+                      R$ {totalSale.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Lucro Bruto Potencial Banner */}
+                <div className="p-2.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/25 border border-[#28B88C]/30 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-emerald-800 dark:text-emerald-300 text-[11px]">
+                    Lucro Bruto Potencial:
+                  </span>
+                  <span className="font-mono font-black text-[#28B88C] text-sm">
+                    {grossProfit >= 0 ? '+' : ''} R$ {grossProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+
+                {/* Action Buttons with 44px touch hitbox */}
+                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-[#24445F]/60">
+                  <button
+                    onClick={() => openLabelModal(p)}
+                    className="min-h-[44px] px-3 py-2 rounded-xl bg-slate-100 dark:bg-[#1A2E44] text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-[#24445F] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Barcode className="w-4 h-4 text-[#28B88C]" />
+                    <span>Etiqueta</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditingProduct(p);
+                      setIsCreateModalOpen(true);
+                    }}
+                    className="min-h-[44px] px-3 py-2 rounded-xl bg-[#28B88C]/15 hover:bg-[#28B88C]/25 text-[#28B88C] border border-[#28B88C]/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    <span>Editar</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+
+        {/* Mobile Totalizer Card */}
+        {filteredProducts.length > 0 && (
+          <div className="bg-slate-900 text-white rounded-2xl p-4 space-y-2.5 shadow-lg">
+            <div className="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+              <span className="font-bold text-slate-200">TOTALIZADOR GERAL</span>
+              <span className="font-mono text-[#28B88C] font-bold">{filteredProducts.length} produtos</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-[10px] text-slate-400 block">Itens Físicos</span>
+                <span className="font-mono font-bold">{financialTotals.physicalUnits.toLocaleString('pt-BR')} itens</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block">Valor a Custo</span>
+                <span className="font-mono font-bold">R$ {financialTotals.totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block">Venda Estimada</span>
+                <span className="font-mono font-bold text-blue-400">R$ {financialTotals.totalSale.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block">Lucro Potencial</span>
+                <span className="font-mono font-bold text-[#28B88C]">+{financialTotals.grossProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 font-mono flex items-center justify-between">
+              <span>Margem Média: <strong className="text-[#28B88C]">{financialTotals.grossMarginPct}%</strong></span>
+              <span>Markup Médio: <strong className="text-indigo-400">{financialTotals.markupPct}%</strong></span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CREATE / EDIT PRODUCT MODAL */}

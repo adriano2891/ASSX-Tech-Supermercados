@@ -263,11 +263,11 @@ export const OperatorModal: React.FC<OperatorModalProps> = ({
         </div>
 
         {/* Modal Navigation Tabs */}
-        <div className="px-6 pt-3 border-b border-slate-200 dark:border-[#24445F] flex gap-2 bg-white dark:bg-[#101D2B] shrink-0 text-xs font-bold">
+        <div className="px-4 sm:px-6 pt-3 border-b border-slate-200 dark:border-[#24445F] flex gap-2 bg-white dark:bg-[#101D2B] shrink-0 text-xs font-bold overflow-x-auto whitespace-nowrap scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab('info')}
-            className={`pb-3 px-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+            className={`shrink-0 pb-3 px-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === 'info'
                 ? 'border-[#28B88C] text-[#28B88C]'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -279,7 +279,7 @@ export const OperatorModal: React.FC<OperatorModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('modules')}
-            className={`pb-3 px-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+            className={`shrink-0 pb-3 px-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === 'modules'
                 ? 'border-[#28B88C] text-[#28B88C]'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -291,7 +291,7 @@ export const OperatorModal: React.FC<OperatorModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('actions')}
-            className={`pb-3 px-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+            className={`shrink-0 pb-3 px-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
               activeTab === 'actions'
                 ? 'border-[#28B88C] text-[#28B88C]'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white'

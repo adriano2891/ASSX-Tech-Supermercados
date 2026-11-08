@@ -223,10 +223,10 @@ export const OperatorsPage: React.FC = () => {
       </div>
 
       {/* Tabs Switcher: Operadores vs Auditoria */}
-      <div className="flex border-b border-slate-200 dark:border-[#24445F] gap-4 text-xs font-bold">
+      <div className="flex border-b border-slate-200 dark:border-[#24445F] gap-4 text-xs font-bold overflow-x-auto whitespace-nowrap scrollbar-none">
         <button
           onClick={() => setActiveTab('operators')}
-          className={`pb-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`shrink-0 pb-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
             activeTab === 'operators'
               ? 'border-[#28B88C] text-[#28B88C]'
               : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-white'
@@ -238,7 +238,7 @@ export const OperatorsPage: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('audit')}
-          className={`pb-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+          className={`shrink-0 pb-3 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
             activeTab === 'audit'
               ? 'border-[#28B88C] text-[#28B88C]'
               : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-white'
@@ -303,7 +303,7 @@ export const OperatorsPage: React.FC = () => {
           {/* Table */}
           <div className="bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] rounded-2xl shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[650px]">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-[#24445F] bg-slate-50/80 dark:bg-[#1A2E44]/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                     <th className="py-3 px-4">Operador</th>

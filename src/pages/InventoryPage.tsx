@@ -179,7 +179,7 @@ export const InventoryPage: React.FC = () => {
 
           {/* Counting Table */}
           <div className="overflow-x-auto border border-slate-200 dark:border-[#24445F] rounded-xl">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[680px]">
               <thead className="bg-slate-50 dark:bg-[#1A2E44] text-slate-500 dark:text-slate-400 uppercase font-semibold">
                 <tr>
                   <th className="py-2.5 px-4">Item / ID</th>
@@ -215,7 +215,7 @@ export const InventoryPage: React.FC = () => {
                             const val = parseInt(e.target.value) || 0;
                             setCountsMap(prev => ({ ...prev, [item.productId]: val }));
                           }}
-                          className="w-24 text-center font-mono font-bold py-1 bg-slate-50 dark:bg-[#1A2E44] border border-slate-200 dark:border-[#24445F] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#28B88C]"
+                          className="h-10 min-w-[80px] w-24 text-center font-mono font-bold py-1 px-2 text-sm bg-slate-50 dark:bg-[#1A2E44] border border-slate-200 dark:border-[#24445F] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#28B88C]"
                         />
                       </td>
 
@@ -279,7 +279,7 @@ export const InventoryPage: React.FC = () => {
         /* Sessions Table */
         <div className="bg-white dark:bg-[#101D2B] rounded-2xl border border-slate-200 dark:border-[#24445F] shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-slate-50 dark:bg-[#1A2E44] border-b border-slate-200 dark:border-[#24445F] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Sessão / Número</th>

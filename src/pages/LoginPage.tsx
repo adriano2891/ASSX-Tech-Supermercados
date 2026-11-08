@@ -78,7 +78,7 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 bg-[#1A2E44]/50 border border-[#24445F] px-3 py-1.5 rounded-xl">
+        <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-400 bg-[#1A2E44]/50 border border-[#24445F] px-3 py-1.5 rounded-xl">
           <Building2 className="w-3.5 h-3.5 text-[#28B88C]" />
           <span>Ambiente Integrado Supabase</span>
         </div>

@@ -217,7 +217,7 @@ export const AnalyticsPage: React.FC = () => {
 
           {/* Top ABC Products Table */}
           <div className="overflow-x-auto border border-slate-200 dark:border-[#24445F] rounded-xl">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[650px]">
               <thead className="bg-slate-50 dark:bg-[#1A2E44] text-slate-500 dark:text-slate-400 uppercase font-semibold">
                 <tr>
                   <th className="py-2.5 px-4">Classe</th>

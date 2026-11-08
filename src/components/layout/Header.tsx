@@ -89,34 +89,34 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
       </div>
 
       {/* Zone 2: Navigation Breadcrumb, Unit Identification & Store Switcher */}
-      <div className="flex items-center gap-2 md:gap-3">
-        {/* Toggle Button next to store/unit identification */}
+      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+        {/* Desktop-only toggle shortcut next to unit switcher */}
         <button
           onClick={toggleSidebar}
           title={isSidebarCollapsed ? "Expandir Barra Lateral" : "Recolher Barra Lateral (Tela Cheia)"}
           aria-label={isSidebarCollapsed ? "Expandir barra lateral" : "Recolher barra lateral"}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#1A2E44] hover:bg-slate-200 dark:hover:bg-[#24445F] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#24445F] transition-all cursor-pointer shadow-xs active:scale-95"
+          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-[#1A2E44] hover:bg-slate-200 dark:hover:bg-[#24445F] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#24445F] transition-all cursor-pointer shadow-xs active:scale-95"
         >
           {isSidebarCollapsed ? (
             <>
               <PanelLeft className="w-4 h-4 text-[#28B88C]" />
-              <span className="hidden lg:inline">Expandir Menu</span>
+              <span>Expandir Menu</span>
             </>
           ) : (
             <>
               <Menu className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-              <span className="hidden lg:inline">Recolher</span>
+              <span>Recolher</span>
             </>
           )}
         </button>
 
         {/* Store selector */}
-        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#1A2E44] px-2.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-[#24445F]">
-          <Building2 className="w-4 h-4 text-[#28B88C] shrink-0" />
+        <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-[#1A2E44] px-2 sm:px-2.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-[#24445F]">
+          <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#28B88C] shrink-0" />
           <select
             value={currentStoreId}
             onChange={e => setCurrentStoreId(e.target.value)}
-            className="text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer max-w-[150px] md:max-w-[200px] truncate"
+            className="text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer max-w-[110px] sm:max-w-[170px] md:max-w-[220px] truncate"
           >
             {stores.map(store => (
               <option key={store.id} value={store.id} className="bg-white dark:bg-[#101D2B] text-slate-900 dark:text-white">
@@ -155,7 +155,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] rounded-2xl shadow-2xl p-4 z-50 text-xs">
+            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] rounded-2xl shadow-2xl p-4 z-50 text-xs">
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-[#24445F]">
                 <span className="font-bold text-sm text-slate-900 dark:text-white">Alertas Operacionais</span>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">{unreadNotificationsCount} não lidos</span>
@@ -222,7 +222,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, activeModuleTit
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] rounded-2xl shadow-2xl p-4 z-50 text-xs">
+            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-xs sm:w-72 bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] rounded-2xl shadow-2xl p-4 z-50 text-xs">
               {/* Active Operator Header Info */}
               <div className="flex items-start gap-3 pb-3 border-b border-slate-200 dark:border-[#24445F]">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#24445F] to-[#101D2B] border border-[#28B88C]/40 text-white flex items-center justify-center font-extrabold text-sm shadow-sm shrink-0">

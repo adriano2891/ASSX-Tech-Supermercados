@@ -32,3 +32,12 @@
     display: block !important;
   }
 }
+
+/* Hide scrollbar for touch carousels and tabs */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

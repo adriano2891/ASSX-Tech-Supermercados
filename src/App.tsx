@@ -157,13 +157,13 @@ function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F5F8] dark:bg-[#0A121B] text-[#101D2B] dark:text-[#F2F5F8] flex flex-col font-sans transition-colors">
+    <div className="min-h-screen bg-[#F2F5F8] dark:bg-[#0A121B] text-[#101D2B] dark:text-[#F2F5F8] flex flex-col font-sans transition-colors w-full max-w-full overflow-x-hidden">
       <Header
         onToggleSidebar={toggleSidebar}
         activeModuleTitle={moduleTitles[currentTab] || 'ASSX Tech'}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden w-full max-w-full">
         <Sidebar
           currentTab={currentTab}
           onSelectTab={setCurrentTab}
@@ -171,13 +171,13 @@ function MainLayout() {
           onClose={() => setIsMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 overflow-y-auto pb-16 lg:pb-6 transition-all duration-300 w-full min-w-0">
+        <main className="flex-1 overflow-y-auto pb-20 lg:pb-6 transition-all duration-300 w-full min-w-0">
           {renderActiveModule()}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation Bar - only authorized icons shown */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white dark:bg-[#101D2B] border-t border-slate-200 dark:border-[#24445F] z-30 flex items-center justify-around px-2 shadow-lg no-print">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white/95 dark:bg-[#101D2B]/95 backdrop-blur-md border-t border-slate-200 dark:border-[#24445F] z-30 flex items-center justify-around px-2 shadow-xl no-print">
         {canAccessModule('dashboard') && (
           <button
             onClick={() => setCurrentTab('dashboard')}

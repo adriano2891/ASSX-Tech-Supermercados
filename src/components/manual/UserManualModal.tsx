@@ -67,29 +67,30 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({ isOpen, onClos
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-black/70 backdrop-blur-xs no-print">
       <div className="bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] w-full max-w-5xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
         {/* Modal Topbar */}
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-[#24445F] flex items-center justify-between bg-slate-50 dark:bg-[#1A2E44]/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-[#28B88C]/15 text-[#28B88C]">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-[#24445F] flex items-center justify-between gap-3 bg-slate-50 dark:bg-[#1A2E44]/50">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-2 rounded-xl bg-[#28B88C]/15 text-[#28B88C] shrink-0">
               <BookOpen className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="font-bold text-base md:text-lg text-slate-900 dark:text-white leading-tight">
+            <div className="min-w-0">
+              <h2 className="font-bold text-sm sm:text-base md:text-lg text-slate-900 dark:text-white leading-tight truncate">
                 Manual do Usuário & Guia Operacional
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
                 Significado de cada módulo, regras de negócio e procedimentos operacionais
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="px-4 py-2 text-xs font-semibold rounded-xl bg-[#28B88C] text-white hover:bg-[#229c76] transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
+              className="px-3 sm:px-4 py-2 text-xs font-semibold rounded-xl bg-[#28B88C] text-white hover:bg-[#229c76] transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
             >
-              <Download className="w-4 h-4" />
-              <span>{downloading ? 'Gerando PDF...' : 'Baixar Manual em PDF'}</span>
+              <Download className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">{downloading ? 'Gerando PDF...' : 'Baixar Manual em PDF'}</span>
+              <span className="sm:hidden">{downloading ? '...' : 'PDF'}</span>
             </button>
 
             <button
@@ -99,6 +100,22 @@ export const UserManualModal: React.FC<UserManualModalProps> = ({ isOpen, onClos
               <X className="w-5 h-5" />
             </button>
           </div>
+        </div>
+
+        {/* Mobile Section Navigator */}
+        <div className="md:hidden px-4 py-2.5 border-b border-slate-200 dark:border-[#24445F] bg-slate-100/70 dark:bg-[#0A121B]/80 flex items-center gap-2 shrink-0">
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 shrink-0">Capítulo:</span>
+          <select
+            value={activeSection}
+            onChange={e => setActiveSection(e.target.value)}
+            className="w-full text-xs font-semibold bg-white dark:bg-[#101D2B] border border-slate-200 dark:border-[#24445F] rounded-xl px-2.5 py-1.5 text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+          >
+            {sections.map(sec => (
+              <option key={sec.id} value={sec.id}>
+                {sec.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Modal Content Split: Sidebar Navigator + Article Body */}
